@@ -10,13 +10,13 @@ def create_vec_env(environment_count: int,
                    step_wait: int = 10,
                    reward_structure: dict = {},
                    **kwargs):
-
+    puse_lppos, puse_predator, pmax_steps, pstep_wait, preward_structure = use_lppos, use_predator, max_steps, step_wait, reward_structure
     return DummyVecEnv([lambda: BotEvade(world_name="21_05",
-                                         use_lppos=use_lppos,
-                                         use_predator=use_predator,
-                                         max_step=max_steps,
-                                         step_wait=step_wait,
-                                         reward_function=Reward(reward_structure))
+                                         use_lppos=puse_lppos,
+                                         use_predator=puse_predator,
+                                         max_step=pmax_steps,
+                                         step_wait=pstep_wait,
+                                         reward_function=Reward(preward_structure))
                         for _ in range(environment_count)])
 
 

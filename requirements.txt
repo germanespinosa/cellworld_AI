@@ -2,3 +2,4 @@ cellworld_gym
 tensorflow
 torch
 stable_baselines3
+sb3-contrib

@@ -1,4 +1,4 @@
-{"algorithm": "DQN",
+{"algorithm": "QRDQN",
  "environment_count": 5,
  "use_predator": true,
  "max_step": 300,
