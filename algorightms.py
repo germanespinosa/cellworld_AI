@@ -74,17 +74,9 @@ def RPPO_train(environment: VecEnv,
               batch_size: int,
               learning_starts: int,
               **kwargs: typing.Any):
-    model = RecurrentPPO("MlpPolicy",
+    model = RecurrentPPO("MlpLstmPolicy",
                          environment,
-                         verbose=1,
-                         batch_size=batch_size,
-                         learning_rate=learning_rate,
-                         train_freq=(1, "step"),
-                         buffer_size=training_steps,
-                         learning_starts=learning_starts,
-                         replay_buffer_class=ReplayBuffer,
-                         tensorboard_log="./tensorboard_logs/",
-                         policy_kwargs={"net_arch": network_architecture})
+                         verbose=1)
     custom_callback = CellworldCallback()
     model.learn(total_timesteps=training_steps,
                 log_interval=log_interval,
