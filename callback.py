@@ -6,7 +6,7 @@ class CellworldCallback(BaseCallback):
     def __init__(self, verbose=0):
         super(CellworldCallback, self).__init__(verbose)
         self.captures_in_episode = 0
-        self.episode_rewards = []
+        self.rewards = []
         self.captures = []
         self.captured = []
         self.survival = []
@@ -19,8 +19,13 @@ class CellworldCallback(BaseCallback):
         self.stats_windows_size = self.model._stats_window_size
 
     def _on_step(self):
-        for info in self.locals["infos"]:
+        for env_id, info in enumerate(self.locals["infos"]):
             if 'terminal_observation' in info:
+                self.rewards.append(info["reward"])
+                if len(self.rewards) > self.stats_windows_size:
+                    self.rewards.pop(0)
+                    print(self.rewards)
+
                 self.captures.append(info["captures"])
                 if len(self.captures) > self.stats_windows_size:
                     self.captures.pop(0)
@@ -46,6 +51,7 @@ class CellworldCallback(BaseCallback):
                 self.logger.record('cellworld/ep_finished', sum(self.finished))
                 self.logger.record('cellworld/ep_truncated', sum(self.truncated))
                 self.logger.record('cellworld/ep_captured', sum(self.captured))
+                self.logger.record('cellworld/reward', safe_mean(self.rewards))
 
                 for agent_name, agent_stats in info["agents"].items():
                     if agent_name not in self.agents:
