@@ -1,11 +1,13 @@
 import os
 import json
 import sys
-
 from vec_env import create_vec_env
-from cellworld_gym import BotEvade
+from cellworld_gym.envs.bot_evade import BotEvade
 from stable_baselines3 import DQN
 from algorightms import algorithms
+
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 
 def random(environment: BotEvade):
     environment.model.real_time = True
