@@ -24,7 +24,6 @@ class CellworldCallback(BaseCallback):
                 self.rewards.append(info["reward"])
                 if len(self.rewards) > self.stats_windows_size:
                     self.rewards.pop(0)
-                    print(self.rewards)
 
                 self.captures.append(info["captures"])
                 if len(self.captures) > self.stats_windows_size:
