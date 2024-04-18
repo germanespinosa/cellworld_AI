@@ -1,4 +1,4 @@
-from stable_baselines3 import DQN, HER
+from stable_baselines3 import DQN, HER, PPO
 import typing
 from callback import CellworldCallback
 from sb3_contrib.qrdqn import QRDQN
@@ -64,6 +64,28 @@ def QRDQN_train(environment: VecEnv,
                 callback=custom_callback)
     model.save("models/%s" % name)
 
+def PPO_train(environment: VecEnv,
+              name: str,
+              training_steps: int,
+              network_architecture: typing.List[int],
+              learning_rate: float,
+              log_interval: int,
+              n_steps: int,
+              **kwargs: typing.Any):
+    model = PPO("MlpPolicy",
+                environment,
+                learning_rate = learning_rate,
+                n_steps = n_steps,
+                policy_kwargs={"net_arch": network_architecture},
+                tensorboard_log="./tensorboard_logs/",
+                verbose=1)
+    custom_callback = CellworldCallback()
+    model.learn(total_timesteps=training_steps,
+                log_interval=log_interval,
+                tb_log_name=name,
+                callback=custom_callback)
+    model.save("models/%s" % name)
+
 
 def RPPO_train(environment: VecEnv,
               name: str,
@@ -72,10 +94,14 @@ def RPPO_train(environment: VecEnv,
               learning_rate: float,
               log_interval: int,
               batch_size: int,
-              learning_starts: int,
+              n_steps: int,
               **kwargs: typing.Any):
     model = RecurrentPPO("MlpLstmPolicy",
                          environment,
+                         batch_size = batch_size,
+                         learning_rate = learning_rate,
+                         policy_kwargs={"net_arch": network_architecture},
+                         n_steps = n_steps,
                          verbose=1)
     custom_callback = CellworldCallback()
     model.learn(total_timesteps=training_steps,
@@ -86,5 +112,6 @@ def RPPO_train(environment: VecEnv,
 
 
 algorithms = {"DQN": DQN_train,
+              "PPO": PPO_train,
               "QRDQN": QRDQN_train,
               "RPPO": RPPO_train}
