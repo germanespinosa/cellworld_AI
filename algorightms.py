@@ -1,6 +1,7 @@
 from stable_baselines3 import DQN, HER, PPO
 import typing
 from callback import CellworldCallback
+from sb3_contrib import TRPO
 from sb3_contrib.qrdqn import QRDQN
 from sb3_contrib.ppo_recurrent import RecurrentPPO
 from stable_baselines3.common.buffers import ReplayBuffer
@@ -110,8 +111,29 @@ def RPPO_train(environment: VecEnv,
                 callback=custom_callback)
     model.save("models/%s" % name)
 
+def TRPO_train(environment: VecEnv,
+               name: str,
+               training_steps: int,
+               network_architecture: typing.List[int],
+               learning_rate: float,
+               log_interval: int,
+               **kwargs: typing.Any):
+    model = TRPO("MlpPolicy",
+                 environment,
+                 verbose=1,
+                 tensorboard_log="./tensorboard_logs/",
+                 policy_kwargs={"net_arch": network_architecture},
+                 learning_rate=learning_rate)
+    custom_callback = CellworldCallback()
+    model.learn(total_timesteps=training_steps,
+                log_interval=log_interval,
+                tb_log_name=name,
+                callback=custom_callback)
+    model.save("models/%s" % name)
+
 
 algorithms = {"DQN": DQN_train,
               "PPO": PPO_train,
               "QRDQN": QRDQN_train,
+              "TRPO": TRPO_train,
               "RPPO": RPPO_train}
