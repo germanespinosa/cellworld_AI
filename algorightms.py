@@ -1,4 +1,4 @@
-from stable_baselines3 import DQN, HER, PPO
+from stable_baselines3 import DQN, PPO
 import typing
 from callback import CellworldCallback
 from sb3_contrib import TRPO
@@ -6,6 +6,7 @@ from sb3_contrib.qrdqn import QRDQN
 from sb3_contrib.ppo_recurrent import RecurrentPPO
 from stable_baselines3.common.buffers import ReplayBuffer
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv
+from gymnasium import Env
 
 
 def DQN_train(environment: VecEnv,
@@ -34,7 +35,23 @@ def DQN_train(environment: VecEnv,
                 log_interval=log_interval,
                 tb_log_name=name,
                 callback=custom_callback)
+    model.save_replay_buffer("models/%s_buffer.pickle" % name)
     model.save("models/%s" % name)
+
+
+def DQN_show(environment: Env,
+             file_name: str):
+    loaded_model = DQN.load(file_name)
+    scores = []
+    for i in range(100):
+        obs, _ = environment.reset()
+        score, done, tr = 0, False, False
+        while not (done or tr):
+            action, _states = loaded_model.predict(obs, deterministic=True)
+            obs, reward, done, tr, _ = environment.step(action)
+            score += reward
+        scores.append(score)
+    environment.close()
 
 
 def QRDQN_train(environment: VecEnv,
@@ -65,6 +82,22 @@ def QRDQN_train(environment: VecEnv,
                 callback=custom_callback)
     model.save("models/%s" % name)
 
+
+def QRDQN_show(environment: Env,
+               file_name: str):
+    loaded_model = QRDQN.load(file_name)
+    scores = []
+    for i in range(100):
+        obs, _ = environment.reset()
+        score, done, tr = 0, False, False
+        while not (done or tr):
+            action, _states = loaded_model.predict(obs, deterministic=True)
+            obs, reward, done, tr, _ = environment.step(action)
+            score += reward
+        scores.append(score)
+    environment.close()
+
+
 def PPO_train(environment: VecEnv,
               name: str,
               training_steps: int,
@@ -86,6 +119,21 @@ def PPO_train(environment: VecEnv,
                 tb_log_name=name,
                 callback=custom_callback)
     model.save("models/%s" % name)
+
+
+def PPO_show(environment: Env,
+             file_name: str):
+    loaded_model = PPO.load(file_name)
+    scores = []
+    for i in range(100):
+        obs, _ = environment.reset()
+        score, done, tr = 0, False, False
+        while not (done or tr):
+            action, _states = loaded_model.predict(obs, deterministic=True)
+            obs, reward, done, tr, _ = environment.step(action)
+            score += reward
+        scores.append(score)
+    environment.close()
 
 
 def RPPO_train(environment: VecEnv,
@@ -111,6 +159,22 @@ def RPPO_train(environment: VecEnv,
                 callback=custom_callback)
     model.save("models/%s" % name)
 
+
+def RPPO_show(environment: Env,
+              file_name: str):
+    loaded_model = RecurrentPPO.load(file_name)
+    scores = []
+    for i in range(100):
+        obs, _ = environment.reset()
+        score, done, tr = 0, False, False
+        while not (done or tr):
+            action, _states = loaded_model.predict(obs, deterministic=True)
+            obs, reward, done, tr, _ = environment.step(action)
+            score += reward
+        scores.append(score)
+    environment.close()
+
+
 def TRPO_train(environment: VecEnv,
                name: str,
                training_steps: int,
@@ -132,8 +196,24 @@ def TRPO_train(environment: VecEnv,
     model.save("models/%s" % name)
 
 
-algorithms = {"DQN": DQN_train,
-              "PPO": PPO_train,
-              "QRDQN": QRDQN_train,
-              "TRPO": TRPO_train,
-              "RPPO": RPPO_train}
+def TRPO_show(environment: Env,
+              file_name: str):
+    loaded_model = TRPO.load(file_name)
+    scores = []
+    for i in range(100):
+        obs, _ = environment.reset()
+        score, done, tr = 0, False, False
+        while not (done or tr):
+            action, _states = loaded_model.predict(obs, deterministic=True)
+            obs, reward, done, tr, _ = environment.step(action)
+            score += reward
+        scores.append(score)
+    environment.close()
+
+
+
+algorithms = {"DQN": (DQN_train, DQN_show),
+              "PPO": (PPO_train, PPO_show),
+              "QRDQN": (QRDQN_train, QRDQN_show),
+              "TRPO": (TRPO_train, TRPO_show),
+              "RPPO": (RPPO_train, RPPO_show)}
