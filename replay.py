@@ -27,7 +27,7 @@ def step_to_state(step: cw.Step) -> cwgame.AgentState:
 
 def get_agent_states_from_episode(episode: cw.Episode,
                                   time_step: float,
-                                  actions: cw.Cell_group) -> typing.Tuple[cwgame.AgentState, typing.Optional[cwgame]]:
+                                  actions: cw.Cell_group) -> typing.Tuple[cwgame.AgentState, typing.Optional[cwgame.AgentState]]:
 
     trajectories = episode.trajectories.split_by_agent()
 
