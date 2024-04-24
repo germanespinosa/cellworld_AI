@@ -17,6 +17,7 @@ def DQN_train(environment: VecEnv,
               log_interval: int,
               batch_size: int,
               learning_starts: int,
+              replay_buffer_file: str,
               **kwargs: typing.Any):
     model = DQN("MlpPolicy",
                 environment,
@@ -31,6 +32,8 @@ def DQN_train(environment: VecEnv,
                 policy_kwargs={"net_arch": network_architecture}
                 )
     custom_callback = CellworldCallback()
+    if replay_buffer_file:
+        model.load_replay_buffer(replay_buffer_file)
     model.learn(total_timesteps=training_steps,
                 log_interval=log_interval,
                 tb_log_name=name,

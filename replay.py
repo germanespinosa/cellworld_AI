@@ -74,7 +74,8 @@ def get_agent_states_from_episode(episode: cw.Episode,
 
 def fill_buffer(experiment_file: str,
                 buffer: ReplayBuffer,
-                env: BotEvadeEnv):
+                env: BotEvadeEnv,
+                buffer_size: int):
     experiment = cw.Experiment.load_from_file(experiment_file)
     loader = env.get_wrapper_attr('loader')
     actions = loader.world.cells.free_cells()
@@ -86,6 +87,8 @@ def fill_buffer(experiment_file: str,
         for prey_state, predator_state, action in get_agent_states_from_episode(episode=episode,
                                                                                 time_step=time_step,
                                                                                 actions=actions):
+            model.has_predator = predator_state is not None
+
             if prev_observation is None:
                 post_observation, infos = env.reset()
             else:
@@ -105,7 +108,10 @@ def fill_buffer(experiment_file: str,
                 break
 
             if buffer.size() % 100 == 0:
-                print(f"{buffer.size()} records so far")
+                print(f"{buffer.size()} out of {buffer_size} records so far")
+
+            if buffer.size() == buffer_size:
+                break
             prev_observation = post_observation
 
 
