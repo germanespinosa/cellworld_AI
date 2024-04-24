@@ -65,6 +65,7 @@ def QRDQN_train(environment: VecEnv,
                 log_interval: int,
                 batch_size: int,
                 learning_starts: int,
+                replay_buffer_file: str = "",
                 **kwargs: typing.Any):
     model = QRDQN("MlpPolicy",
                   environment,
@@ -79,6 +80,8 @@ def QRDQN_train(environment: VecEnv,
                   policy_kwargs={"net_arch": network_architecture}
                   )
     custom_callback = CellworldCallback()
+    if replay_buffer_file:
+        model.load_replay_buffer(replay_buffer_file)
     model.learn(total_timesteps=training_steps,
                 log_interval=log_interval,
                 tb_log_name=name,
@@ -108,6 +111,7 @@ def PPO_train(environment: VecEnv,
               learning_rate: float,
               log_interval: int,
               n_steps: int,
+              replay_buffer_file: str = "",
               **kwargs: typing.Any):
     model = PPO("MlpPolicy",
                 environment,
@@ -147,6 +151,7 @@ def RPPO_train(environment: VecEnv,
               log_interval: int,
               batch_size: int,
               n_steps: int,
+              replay_buffer_file: str = "",
               **kwargs: typing.Any):
     model = RecurrentPPO("MlpLstmPolicy",
                          environment,
@@ -184,6 +189,7 @@ def TRPO_train(environment: VecEnv,
                network_architecture: typing.List[int],
                learning_rate: float,
                log_interval: int,
+               replay_buffer_file: str = "",
                **kwargs: typing.Any):
     model = TRPO("MlpPolicy",
                  environment,
