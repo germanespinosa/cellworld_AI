@@ -17,7 +17,7 @@ def DQN_train(environment: VecEnv,
               log_interval: int,
               batch_size: int,
               learning_starts: int,
-              replay_buffer_file: str,
+              replay_buffer_file: str = "",
               **kwargs: typing.Any):
     model = DQN("MlpPolicy",
                 environment,

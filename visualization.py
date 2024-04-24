@@ -1,7 +1,7 @@
 import os
 import json
 import argparse
-from vec_env import create_vec_env
+from env import create_vec_env
 from algorightms import algorithms
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
