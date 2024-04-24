@@ -1,5 +1,6 @@
 from stable_baselines3 import DQN, PPO
 import typing
+from typing import Union
 from callback import CellworldCallback
 from sb3_contrib import TRPO
 from sb3_contrib.qrdqn import QRDQN
@@ -17,7 +18,7 @@ def DQN_train(environment: VecEnv,
               log_interval: int,
               batch_size: int,
               learning_starts: int,
-              replay_buffer_file: str,
+              replay_buffer_file: Union[bool, str] = False,
               **kwargs: typing.Any):
     model = DQN("MlpPolicy",
                 environment,
