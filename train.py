@@ -29,7 +29,7 @@ if __name__ == "__main__":
         print("Model File not found")
         exit(1)
 
-    if not os.path.exists(args.replay_buffer_file):
+    if args.replay_buffer_file and not os.path.exists(args.replay_buffer_file):
         print("Replay buffer File not found")
         exit(1)
 

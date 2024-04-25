@@ -15,7 +15,7 @@ def create_env(use_lppos: bool = True,
                            use_predator=use_predator,
                            max_step=max_steps,
                            time_step=time_step,
-                           reward_function=cwg.BotEvadeReward(reward_structure))
+                           reward_function=cwg.Reward(reward_structure))
 
 
 def create_vec_env(environment_count: int,
