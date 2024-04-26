@@ -1,10 +1,9 @@
 import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import json
 import argparse
-from env import create_vec_env
+from env import create_botevade_env
 from algorightms import algorithms
-
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
 def parse_arguments():
@@ -17,15 +16,18 @@ def parse_arguments():
 if __name__ == "__main__":
     try:
         args = parse_arguments()
+        model_config_file = "models/%s_config.json" % args.model_name
         if args.lppo:
             model_file = "models/%s_tlppo.zip" % args.model_name
         else:
             model_file = "models/%s_control.zip" % args.model_name
 
         if os.path.exists(model_file):
-            model_config = json.loads(open(model_file).read())
-            env = create_vec_env(use_lppos=False,
-                                 **model_config).envs[0]
+            model_config = json.loads(open(model_config_file).read())
+            env = create_botevade_env(use_lppos=False,
+                                      render=True,
+                                      real_time=True,
+                                      **model_config)
 
             train, show = algorithms[model_config["algorithm"]]
 

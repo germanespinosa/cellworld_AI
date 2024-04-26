@@ -1,16 +1,17 @@
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
+import argparse
 import pickle
 import json
 import typing
 import cellworld as cw
 import cellworld_game as cwgame
 import numpy as np
+from collections import namedtuple
 from cellworld_gym import BotEvadeEnv
 from stable_baselines3.common.buffers import ReplayBuffer
-import argparse
-from env import create_env
+from env import create_botevade_env
 
 
 def parse_arguments():
@@ -19,6 +20,9 @@ def parse_arguments():
     parser.add_argument('-bf', '--replay_buffer_folder', type=str, help='folder containing cellworld experiment files', required=True)
     parser.add_argument('-bs', '--replay_buffer_size', type=int, help='size of the replay buffer (default 10000)', required=False)
     parser.add_argument('-bo', '--replay_buffer_output_file', type=str, help='replay buffer output file', required=True)
+    parser.add_argument('-fp', '--filter_by_phases', type=str, help='experimental phases that should be included in the buffer (default ALL)', required=False)
+    parser.add_argument('-fs', '--filter_by_subject', type=str, help='experimental subjects that should be included in the buffer (default ALL)', required=False)
+    parser.add_argument('-s', '--sort_by', type=str, help='sorts the experiments before creating the replay buffer (default NONE)', required=False)
     args = parser.parse_args()
     return args
 
@@ -103,16 +107,18 @@ def fill_buffer(experiment_file: str,
     loader = env.get_wrapper_attr('loader')
     actions = loader.world.cells.free_cells()
     time_step = env.get_wrapper_attr('time_step')
+    reset = env.get_wrapper_attr('replay_reset')
+    step = env.get_wrapper_attr('replay_step')
     for episode in experiment.episodes:
         prev_observation, infos = None, {}
         for agents_state, action in get_agent_states_from_episode(episode=episode,
                                                                   time_step=time_step,
                                                                   actions=actions):
             if prev_observation is None:
-                prev_observation, infos = env.replay_reset(agents_state=agents_state)
+                prev_observation, infos = reset(agents_state=agents_state)
                 continue
 
-            post_observation, reward, done, truncated, infos = env.replay_step(agents_state=agents_state)
+            post_observation, reward, done, truncated, infos = step(agents_state=agents_state)
             buffer.add(obs=prev_observation,
                        next_obs=post_observation,
                        action=np.array([action]),
@@ -140,9 +146,13 @@ def replay_episode(episode: cw.Episode, env: BotEvadeEnv):
         env.step(step.action)
 
 
-def parse_experiment_name(experiment_name):
+def parse_experiment_file(experiment_file_path: str) -> typing.Optional[namedtuple]:
     import re
     import datetime
+    experiment_file_name = os.path.basename(experiment_file_path)
+    experiment_name = experiment_file_name.replace("_experiment.json", "")
+    ExperimentData = namedtuple("experiment_data",
+                                ["name", "prefix", "subject", "phase", "iteration", "date_time", "occlusions", "file_path"])
     parts = experiment_name.split("_")
     prefix = parts[0]
     phase_iteration = parts[-1]
@@ -153,8 +163,16 @@ def parse_experiment_name(experiment_name):
     iteration = int(match.group(2))
     occlusions = "%s_%s" % (parts[-3], parts[-2])
     subject = parts[-4]
-    experiment_date = datetime.datetime.strptime("%s_%s" % (parts[1], parts[2]), "%Y%m%d_%H%M")
-    return prefix, experiment_date, subject, occlusions, phase, iteration
+    date_time = datetime.datetime.strptime("%s_%s" % (parts[1], parts[2]), "%Y%m%d_%H%M")
+    data = ExperimentData(file_path=experiment_file_path,
+                          name=experiment_name,
+                          prefix=prefix,
+                          phase=phase,
+                          iteration=iteration,
+                          occlusions=occlusions,
+                          subject=subject,
+                          date_time=date_time)
+    return data
 
 
 if __name__ == "__main__":
@@ -192,25 +210,39 @@ model_config_predator["use_predator"] = True
 model_config_no_predator.update(model_config)
 model_config_no_predator["use_predator"] = False
 
-pred_env = create_env(use_lppos=False,
-                      **model_config_predator)
+pred_env = create_botevade_env(use_lppos=False,
+                               **model_config_predator)
 
-no_pred_env = create_env(use_lppos=False,
-                         **model_config_no_predator)
+no_pred_env = create_botevade_env(use_lppos=False,
+                                  **model_config_no_predator)
 
 replay_buffer = ReplayBuffer(buffer_size=buffer_size,
                              observation_space=pred_env.observation_space,
                              action_space=pred_env.action_space)
 
-for experiment_file in experiment_files(start_path=args.replay_buffer_folder):
-    file_name = os.path.basename(experiment_file)
-    prefix, experiment_date, subject, occlusions, phase, iteration = parse_experiment_name(
-        file_name.replace("_experiment.json", ""))
-    print(f"Loading experiment file {file_name}")
-    if "R" in phase:
-        fill_buffer(experiment_file, replay_buffer, pred_env, buffer_size)
+experiments = [parse_experiment_file(experiment_file_path=file_path) for file_path in experiment_files(start_path=args.replay_buffer_folder)]
+
+experiments = [data for data in experiments if data]
+
+if args.filter_by_phases:
+    phases_filter = args.filter_by_phases.split(",")
+    experiments = [data for data in experiments if data.phase in phases_filter]
+
+if args.filter_by_subject:
+    subject_filter = args.filter_by_subject.split(",")
+    experiments = [data for data in experiments if data.subject in subject_filter]
+
+if args.sort_by:
+    sort_by = args.sort_by.split(",")
+    experiments = sorted(experiments, key=lambda data: tuple([getattr(data, field) for field in sort_by]))
+
+
+for data in experiments:
+    print(f"Loading experiment {data.name}")
+    if "R" in data.phase:
+        fill_buffer(data.file_path, replay_buffer, pred_env, buffer_size)
     else:
-        fill_buffer(experiment_file, replay_buffer, no_pred_env, buffer_size)
+        fill_buffer(data.file_path, replay_buffer, no_pred_env, buffer_size)
     if replay_buffer.size() == buffer_size:
         break
 
@@ -218,31 +250,3 @@ with open(args.replay_buffer_output_file, 'wb') as f:
     pickle.dump(replay_buffer, f)
 
 
-# for experiment_file in experiment_files(start_path):
-#     experiment = cw.Experiment.load_from_file(experiment_file)
-#     env = BotEvadeEnv(world_name=experiment.occlusions,
-#                       use_lppos=False,
-#                       use_predator=False,
-#                       time_step=time_step,
-#                       real_time=True,
-#                       render=True)
-#
-#     prefix, experiment_date, subject, occlusions, phase, iteration = parse_experiment_name(os.path.basename(experiment_file).replace("_experiment.json", ""))
-#     if "R" in phase:
-#         continue
-#     for episode in experiment.episodes:
-#         prev_observation, infos = None, {}
-#         for agents_state, action in get_agent_states_from_episode(episode=episode,
-#                                                                   time_step=time_step,
-#                                                                   actions=env.loader.world.cells.free_cells()):
-#             if prev_observation is None:
-#                 prev_observation, infos = env.replay_reset(agents_state)
-#                 continue
-#             post_observation, reward, done, truncated, infos = env.replay_step(agents_state)
-#             env.model.view.draw()
-#             prev_observation = post_observation
-#             print(reward)
-#             if done or truncated:
-#                 break
-#
-#

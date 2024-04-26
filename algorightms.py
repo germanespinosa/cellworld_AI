@@ -44,6 +44,8 @@ def DQN_train(environment: VecEnv,
 
 def DQN_show(environment: Env,
              file_name: str):
+    model = environment.get_wrapper_attr('model')
+    model.render = True
     loaded_model = DQN.load(file_name)
     scores = []
     for i in range(100):

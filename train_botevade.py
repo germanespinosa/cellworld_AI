@@ -3,7 +3,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 import json
 import argparse
-from env import create_vec_env
+from env import create_vec_botevade_env
 from algorightms import algorithms
 
 
@@ -37,8 +37,8 @@ if __name__ == "__main__":
 
     train, show = algorithms[model_config["algorithm"]]
 
-    vec_envs = create_vec_env(use_lppos=False,
-                              **model_config)
+    vec_envs = create_vec_botevade_env(use_lppos=False,
+                                       **model_config)
 
     train(environment=vec_envs,
           name="%s_control" % args.model_name,
@@ -46,8 +46,8 @@ if __name__ == "__main__":
           **model_config)
 
     if args.tlppo:
-        vec_envs = create_vec_env(use_lppos=True,
-                                  **model_config)
+        vec_envs = create_vec_botevade_env(use_lppos=True,
+                                           **model_config)
 
         train(environment=vec_envs,
               name="%s_tlppo" % args.model_name,
