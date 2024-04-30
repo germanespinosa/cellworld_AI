@@ -11,7 +11,7 @@ import numpy as np
 from collections import namedtuple
 from cellworld_gym import BotEvadeEnv
 from stable_baselines3.common.buffers import ReplayBuffer
-from env import create_botevade_env
+from env import create_env
 
 
 def parse_arguments():
@@ -210,11 +210,11 @@ model_config_predator["use_predator"] = True
 model_config_no_predator.update(model_config)
 model_config_no_predator["use_predator"] = False
 
-pred_env = create_botevade_env(use_lppos=False,
-                               **model_config_predator)
+pred_env = create_env(use_lppos=False,
+                      **model_config_predator)
 
-no_pred_env = create_botevade_env(use_lppos=False,
-                                  **model_config_no_predator)
+no_pred_env = create_env(use_lppos=False,
+                         **model_config_no_predator)
 
 replay_buffer = ReplayBuffer(buffer_size=buffer_size,
                              observation_space=pred_env.observation_space,
@@ -246,7 +246,11 @@ for data in experiments:
     if replay_buffer.size() == buffer_size:
         break
 
-with open(args.replay_buffer_output_file, 'wb') as f:
+replay_buffer_output_file = f"buffers/{args.replay_buffer_output_file}"
+
+print(f"saving replay buffer file {replay_buffer_output_file}")
+
+with open(replay_buffer_output_file, 'wb') as f:
     pickle.dump(replay_buffer, f)
 
 

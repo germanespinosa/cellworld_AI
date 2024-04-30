@@ -3,12 +3,12 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 import json
 import argparse
-from env import create_vec_botevade_env
+from tasks.botevade.env import create_vec_botevade_env
 from algorightms import algorithms
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Cellworld AI training tool: trains an RL model on a Cellworld OpenAI Gym environment')
+    parser = argparse.ArgumentParser(description='Cellworld AI BotEvade training tool: trains an RL model on the BotEvade Cellworld OpenAI Gym environment')
     parser.add_argument('model_name', type=str, help='name of the model file in the models folder')
     parser.add_argument('-b', '--replay_buffer_file', type=str, help='replay buffer file', required=False)
     parser.add_argument('-l', '--tlppo', action='store_true', help='performs tlppo training')
