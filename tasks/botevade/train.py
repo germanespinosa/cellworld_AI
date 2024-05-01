@@ -1,3 +1,5 @@
+import metrica
+metrica.start_profile()
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import sys
@@ -7,8 +9,9 @@ import argparse
 from env import create_vec_env
 from algorightms import algorithms
 from callback import CellworldCallback
-import folders
+import config
 
+config.task_name = "botevade"
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Cellworld AI BotEvade training tool: trains an RL model on the BotEvade Cellworld OpenAI Gym environment')
@@ -27,7 +30,8 @@ if __name__ == "__main__":
         print("Error:", e)
         exit(1)
 
-    model_configuration_file = f"{folders.models}/{args.model_name}_config.json"
+    run_identifier = config.run_identifier(run_id=args.run_identifier)
+    model_configuration_file = config.model_config_file(model_name=args.model_name)
 
     if not os.path.exists(model_configuration_file):
         print(f"Model configuration file '{model_configuration_file}' not found")
@@ -35,36 +39,34 @@ if __name__ == "__main__":
 
     replay_buffer_file = ""
     if args.replay_buffer_file:
-        replay_buffer_file = f"{folders.buffers}/{args.replay_buffer_file}"
+        replay_buffer_file = config.in_buffer_file(replay_buffer_file=replay_buffer_file)
         if not os.path.exists(replay_buffer_file):
             print(f"Replay buffer file '{replay_buffer_file}' not found")
             exit(1)
 
     model_config = json.loads(open(model_configuration_file).read())
 
-    run_replay_buffer_file = f"{folders.buffers}/{args.model_name}_{args.run_identifier}_buffer.pickle"
-    run_data_file = f"{folders.data}/{args.model_name}_{args.run_identifier}"
-
-    vec_envs = create_vec_env(use_lppos=args.tlppo,
+    run_replay_buffer_file = config.out_buffer_file(model_name=args.model_name,
+                                                    run_identifier=run_identifier)
+    run_data_file = config.data_file(model_name=args.model_name,
+                                     run_identifier=run_identifier)
+    logs_folder = config.tensor_board_logs_folder(model_name=args.model_name,
+                                                  run_identifier=run_identifier)
+    tlppo = True if args.tlppo else False
+    vec_envs = create_vec_env(use_lppos=tlppo,
                               **model_config)
 
     print("envs created: ", len(vec_envs.envs))
 
-    if args.run_identifier:
-        logs_folder = f"{args.model_name}_{args.run_identifier}"
-    else:
-        from datetime import datetime
-        current_datetime = datetime.now()
-        formatted_date = current_datetime.strftime("%Y%m%d_%H%M%S")
-        logs_folder = f"{args.model_name}_{formatted_date}"
-
     algorithm = algorithms[model_config["algorithm"]]
 
     if os.path.exists(run_data_file):
+        print(f"Data file '{run_data_file}' found, loading...")
         model = algorithm.load(env=vec_envs,
                                path=run_data_file)
         reset_num_time_steps = False
     else:
+        print(f"Data file '{run_data_file}' not found")
         model = algorithm.create(environment=vec_envs,
                                  tensorboard_log_folder=logs_folder,
                                  **model_config)

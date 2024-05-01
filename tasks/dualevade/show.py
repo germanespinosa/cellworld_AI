@@ -2,10 +2,9 @@ import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import json
 import argparse
-from tasks.botevade.env import create_env
+from env import create_env, set_other_policy
 from algorightms import algorithms
 import config
-
 config.task_name = "botevade"
 
 
@@ -34,6 +33,9 @@ if __name__ == "__main__":
         exit(1)
 
     run_identifier = config.run_identifier(run_id=args.run_identifier)
+    run_identifier_1 = "mouse_1_" + config.run_identifier(run_id=args.run_identifier)
+    run_identifier_2 = "mouse_2_" + config.run_identifier(run_id=args.run_identifier)
+
     model_configuration_file = config.model_config_file(model_name=args.model_name)
 
     if not os.path.exists(model_configuration_file):
@@ -42,14 +44,22 @@ if __name__ == "__main__":
     else:
         print(f"Model configuration file '{model_configuration_file}' found")
 
-    run_data_file = config.data_file(model_name=args.model_name,
-                                     run_identifier=run_identifier)
+    run_data_file_1 = config.data_file(model_name=args.model_name,
+                                       run_identifier=run_identifier_1)
+    run_data_file_2 = config.data_file(model_name=args.model_name,
+                                       run_identifier=run_identifier_2)
 
-    if not os.path.exists(run_data_file):
-        print(f"Data file '{run_data_file}' not found")
+    if not os.path.exists(run_data_file_1):
+        print(f"Data file '{run_data_file_1}' not found")
         exit(1)
     else:
-        print(f"Data file '{run_data_file}' found")
+        print(f"Data file '{run_data_file_1}' found")
+
+    if not os.path.exists(run_data_file_2):
+        print(f"Data file '{run_data_file_2}' not found")
+        exit(1)
+    else:
+        print(f"Data file '{run_data_file_2}' found")
 
     model_config = json.loads(open(model_configuration_file).read())
 
@@ -59,7 +69,10 @@ if __name__ == "__main__":
                              **model_config)
 
     algorithm = algorithms[model_config["algorithm"]]
-    model = algorithm.load(run_data_file)
+    model_1 = algorithm.load(run_data_file_1)
+    model_2 = algorithm.load(run_data_file_1)
+
+    set_other_policy(vec_env=environment, model=model_2)
 
     gameplay_frames = []
     if args.video:
@@ -80,7 +93,7 @@ if __name__ == "__main__":
         observation, _ = environment.reset()
         score, done, tr = 0, False, False
         while not (done or tr):
-            action, _ = model.predict(observation, deterministic=True)
+            action, _ = model_1.predict(observation, deterministic=True)
             observation, reward, done, tr, _ = environment.step(action)
             score += reward
         scores.append(score)

@@ -75,7 +75,11 @@ def set_other_policy(vec_env: DummyVecEnv, model):
         action, _states = model.predict(obs, deterministic=True)
         return action
 
-    for env in vec_env.envs:
-        sop = env.get_wrapper_attr("set_other_policy")
+    if hasattr(vec_env, "envs"):
+        for env in vec_env.envs:
+            sop = env.get_wrapper_attr("set_other_policy")
+            sop(other_policy)
+    else:
+        sop = vec_env.get_wrapper_attr("set_other_policy")
         sop(other_policy)
 

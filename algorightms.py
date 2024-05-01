@@ -16,7 +16,7 @@ def DQN_create(environment: VecEnv,
                learning_rate: float,
                batch_size: int,
                learning_starts: int,
-               tensorboard_log_folder: str = "",
+               tensorboard_log_folder: str,
                **kwargs: typing.Any):
     return DQN("MlpPolicy",
                environment,
@@ -27,9 +27,10 @@ def DQN_create(environment: VecEnv,
                buffer_size=training_steps,
                learning_starts=learning_starts,
                replay_buffer_class=ReplayBuffer,
-               tensorboard_log=f"./tensorboard_logs/{tensorboard_log_folder}",
+               tensorboard_log=tensorboard_log_folder,
                policy_kwargs={"net_arch": network_architecture}
                )
+
 
 def QRDQN_create(environment: VecEnv,
                  training_steps: int,
@@ -37,7 +38,7 @@ def QRDQN_create(environment: VecEnv,
                  learning_rate: float,
                  batch_size: int,
                  learning_starts: int,
-                 tensorboard_log_folder: str = "",
+                 tensorboard_log_folder: str,
                  **kwargs: typing.Any):
     return QRDQN("MlpPolicy",
                  environment,
@@ -48,7 +49,7 @@ def QRDQN_create(environment: VecEnv,
                  buffer_size=training_steps,
                  learning_starts=learning_starts,
                  replay_buffer_class=ReplayBuffer,
-                 tensorboard_log=f"./tensorboard_logs/{tensorboard_log_folder}",
+               tensorboard_log=tensorboard_log_folder,
                  policy_kwargs={"net_arch": network_architecture}
                  )
 
@@ -57,43 +58,45 @@ def PPO_create(environment: VecEnv,
                network_architecture: typing.List[int],
                learning_rate: float,
                n_steps: int,
-               tensorboard_log_folder: str = "",
+               tensorboard_log_folder: str,
                **kwargs: typing.Any):
     return PPO("MlpPolicy",
                environment,
                learning_rate=learning_rate,
                n_steps=n_steps,
                policy_kwargs={"net_arch": network_architecture},
-               tensorboard_log=f"./tensorboard_logs/{tensorboard_log_folder}",
+               tensorboard_log=tensorboard_log_folder,
                verbose=1)
+
 
 def RPPO_create(environment: VecEnv,
                 network_architecture: typing.List[int],
                 learning_rate: float,
                 batch_size: int,
                 n_steps: int,
-                tensorboard_log_folder: str = "",
+                tensorboard_log_folder: str,
                 **kwargs: typing.Any):
     return RecurrentPPO("MlpLstmPolicy",
                         environment,
                         batch_size=batch_size,
                         learning_rate=learning_rate,
-                        tensorboard_log=f"./tensorboard_logs/{tensorboard_log_folder}",
                         policy_kwargs={"net_arch": network_architecture},
+                        tensorboard_log=tensorboard_log_folder,
                         n_steps=n_steps,
                         verbose=1)
+
 
 def TRPO_create(environment: VecEnv,
                 network_architecture: typing.List[int],
                 learning_rate: float,
-                tensorboard_log_folder: str = "",
+                tensorboard_log_folder: str,
                 **kwargs: typing.Any):
     return TRPO("MlpPolicy",
                 environment,
                 verbose=1,
-                tensorboard_log=f"./tensorboard_logs/{tensorboard_log_folder}",
+                learning_rate=learning_rate,
                 policy_kwargs={"net_arch": network_architecture},
-                learning_rate=learning_rate)
+                tensorboard_log=tensorboard_log_folder)
 
 
 algorithms = {"DQN": Algorithm(DQN_create, DQN.load),

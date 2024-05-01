@@ -26,7 +26,7 @@ def create_env(world_name: str = "21_05",
 
 def create_vec_env(environment_count: int,
                    world_name: str = "21_05",
-                   use_lppos: bool = True,
+                   use_lppos: bool = False,
                    use_predator: bool = False,
                    max_steps: int = 300,
                    time_step: float = .25,
