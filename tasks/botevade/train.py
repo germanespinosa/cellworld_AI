@@ -1,5 +1,5 @@
-import metrica
-metrica.start_profile()
+import pulsekit
+pulsekit.start_profile()
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import sys
