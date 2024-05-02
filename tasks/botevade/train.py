@@ -1,5 +1,3 @@
-import pulsekit
-pulsekit.start_profile()
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import sys
@@ -82,8 +80,9 @@ if __name__ == "__main__":
                 callback=CellworldCallback(),
                 reset_num_timesteps=reset_num_time_steps)
 
-    print(f"saving replay buffer file {run_replay_buffer_file}")
-    model.save_replay_buffer(run_replay_buffer_file)
-
     print(f"saving data file {run_data_file}")
     model.save(run_data_file)
+
+    if hasattr(model, "save_replay_buffer"):
+        print(f"saving replay buffer file {run_replay_buffer_file}")
+        model.save_replay_buffer(run_replay_buffer_file)
