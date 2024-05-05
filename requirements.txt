@@ -3,3 +3,4 @@ cellworld_gym
 tensorflow
 torch
 stable_baselines3
+tianshou

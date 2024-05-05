@@ -14,7 +14,8 @@ def parse_arguments():
     parser.add_argument('model_name', type=str, help='name of the model file in the models folder')
     parser.add_argument('-r', '--run_identifier', type=str, help='string identifying the run')
     parser.add_argument('-e', '--episode_count', type=int, help='number of episodes to show')
-    parser.add_argument('-v', '--video', type=str, help='output episodes videos')
+    parser.add_argument('-c', '--cycle', type=int, help='model cycle')
+    parser.add_argument('-v', '--video', action='store_true', help='output episodes videos')
     parser.add_argument('-t', '--tlppo', action='store_true', help='performs tlppo training')
     parser.add_argument('-s', '--silent', action='store_true', help='renders the environment to the screen')
     parser.add_argument('-rt', '--real_time', action='store_true', help='run_in_real_time')
@@ -33,8 +34,10 @@ if __name__ == "__main__":
         print("Error:", e)
         exit(1)
 
-    run_identifier = config.run_identifier(run_id=args.run_identifier)
-    model_configuration_file = config.model_config_file(model_name=args.model_name)
+    config.set_task("botevade")
+    config.set_model(args.model_name)
+    config.set_run_identifier(args.run_identifier)
+    model_configuration_file = config.model_config_file()
 
     if not os.path.exists(model_configuration_file):
         print(f"Model configuration file '{model_configuration_file}' not found")
@@ -42,8 +45,10 @@ if __name__ == "__main__":
     else:
         print(f"Model configuration file '{model_configuration_file}' found")
 
-    run_data_file = config.data_file(model_name=args.model_name,
-                                     run_identifier=run_identifier)
+    run_data_file = config.data_file()
+
+    if args.cycle:
+        run_data_file = run_data_file.replace(".zip", f"_{args.cycle}.zip")
 
     if not os.path.exists(run_data_file):
         print(f"Data file '{run_data_file}' not found")
@@ -61,10 +66,8 @@ if __name__ == "__main__":
     algorithm = algorithms[model_config["algorithm"]]
     model = algorithm.load(run_data_file)
 
-    gameplay_frames = []
     if args.video:
-        videos_folder = config.video_folder(model_name=args.model_name,
-                                            run_identifier=run_identifier)
+        videos_folder = config.video_folder()
         print(f"Saving videos to {videos_folder}")
         import video
         video.save_video_output(environment=environment,

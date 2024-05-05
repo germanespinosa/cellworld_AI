@@ -5,7 +5,6 @@ import gymnasium
 
 
 def create_env(world_name: str = "21_05",
-               pov: cwg.DualEvadePov = cwg.DualEvadePov.mouse_1,
                use_lppos: bool = True,
                use_predator: bool = False,
                max_steps: int = 300,
@@ -13,10 +12,10 @@ def create_env(world_name: str = "21_05",
                reward_structure: dict = {},
                render: bool = False,
                real_time: bool = False,
+               end_on_pov_goal: bool = True,
                **kwargs):
 
     return gymnasium.make("CellworldDualEvade-v0",
-                          pov=pov,
                           world_name=world_name,
                           use_lppos=use_lppos,
                           use_predator=use_predator,
@@ -24,12 +23,13 @@ def create_env(world_name: str = "21_05",
                           time_step=time_step,
                           reward_function=cwg.Reward(reward_structure),
                           real_time=real_time,
-                          render=render)
+                          render=render,
+                          end_on_pov_goal=end_on_pov_goal
+                          )
 
 
 def create_vec_env(environment_count: int,
                    world_name: str = "21_05",
-                   pov: cwg.DualEvadePov = cwg.DualEvadePov.mouse_1,
                    use_lppos: bool = True,
                    use_predator: bool = False,
                    max_steps: int = 300,
@@ -39,7 +39,6 @@ def create_vec_env(environment_count: int,
 
     return DummyVecEnv([lambda:
                         create_env(world_name=world_name,
-                                   pov=pov,
                                    use_lppos=use_lppos,
                                    use_predator=use_predator,
                                    max_steps=max_steps,
@@ -50,7 +49,6 @@ def create_vec_env(environment_count: int,
 
 def load_vec_env(environment_count: int,
                  world_name: str = "21_05",
-                 pov: cwg.DualEvadePov = cwg.DualEvadePov.mouse_1,
                  use_lppos: bool = True,
                  use_predator: bool = False,
                  max_steps: int = 300,
@@ -60,7 +58,6 @@ def load_vec_env(environment_count: int,
 
     return DummyVecEnv([lambda:
                         create_env(world_name=world_name,
-                                   pov=pov,
                                    use_lppos=use_lppos,
                                    use_predator=use_predator,
                                    max_steps=max_steps,
@@ -77,9 +74,7 @@ def set_other_policy(vec_env: DummyVecEnv, model):
 
     if hasattr(vec_env, "envs"):
         for env in vec_env.envs:
-            sop = env.get_wrapper_attr("set_other_policy")
-            sop(other_policy)
+            env.set_other_policy(other_policy)
     else:
-        sop = vec_env.get_wrapper_attr("set_other_policy")
-        sop(other_policy)
+        vec_env.set_other_policy(other_policy)
 

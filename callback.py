@@ -14,6 +14,7 @@ class CellworldCallback(BaseCallback):
         self.truncated = []
         self.agents = {}
         self.stats_windows_size = 0
+        self.current_survival = 0.0
 
     def _on_training_start(self):
         self.stats_windows_size = self.model._stats_window_size
@@ -44,9 +45,9 @@ class CellworldCallback(BaseCallback):
                 self.truncated.append(1 if info["TimeLimit.truncated"] else 0)
                 if len(self.truncated) > self.stats_windows_size:
                     self.truncated.pop(0)
-
+                self.current_survival = safe_mean(self.survival)
                 self.logger.record('cellworld/avg_captures', safe_mean(self.captures))
-                self.logger.record('cellworld/survival_rate', safe_mean(self.survival))
+                self.logger.record('cellworld/survival_rate', self.current_survival)
                 self.logger.record('cellworld/ep_finished', sum(self.finished))
                 self.logger.record('cellworld/ep_truncated', sum(self.truncated))
                 self.logger.record('cellworld/ep_captured', sum(self.captured))
