@@ -17,6 +17,7 @@ def parse_arguments():
     parser.add_argument('-r', '--run_identifier', type=str, help='string identifying the run')
     parser.add_argument('-b', '--replay_buffer_file', type=str, help='replay buffer file', required=False)
     parser.add_argument('-t', '--tlppo', action='store_true', help='performs tlppo training')
+    parser.add_argument('-o', '--other', action='store_true', help='include information about the other agent in observation')
     args = parser.parse_args()
     return args
 
@@ -57,12 +58,16 @@ if __name__ == "__main__":
     logs_folder_2 = config.tensor_board_logs_folder(suffix="mouse_2")
 
     tlppo = True if args.tlppo else False
+    other = True if args.other else False
+
     vec_envs_1 = create_vec_env(use_lppos=tlppo,
+                                use_other=other,
                                 **model_config)
 
     print("Mouse 1 envs created: ", len(vec_envs_1.envs))
 
     vec_envs_2 = create_vec_env(use_lppos=tlppo,
+                                use_other=other,
                                 **model_config)
 
     print("Mouse 2 envs created: ", len(vec_envs_2.envs))
@@ -72,12 +77,14 @@ if __name__ == "__main__":
     if os.path.exists(run_data_file_1):
         print(f"Data file '{run_data_file_1}' found, loading...")
         model_1 = algorithm.load(env=vec_envs_1,
+                                 tb_log_name=logs_folder_1,
                                  path=run_data_file_1)
 
         reset_num_time_steps_1 = False
     else:
         print(f"Data file '{run_data_file_1}' not found")
         model_1 = algorithm.create(environment=vec_envs_1,
+                                   tb_log_name=logs_folder_1,
                                    **model_config)
 
         reset_num_time_steps_1 = True
@@ -85,12 +92,14 @@ if __name__ == "__main__":
     if os.path.exists(run_data_file_2):
         print(f"Data file '{run_data_file_2}' found, loading...")
         model_2 = algorithm.load(env=vec_envs_2,
+                                 tb_log_name=logs_folder_2,
                                  path=run_data_file_2)
 
         reset_num_time_steps_2 = False
     else:
         print(f"Data file '{run_data_file_2}' not found")
         model_2 = algorithm.create(environment=vec_envs_2,
+                                   tb_log_name=logs_folder_2,
                                    **model_config)
 
         reset_num_time_steps_2 = True
@@ -126,7 +135,6 @@ if __name__ == "__main__":
     for cycle in range(model_config["training_cycles"]):
         model_1.learn(total_timesteps=model_config["training_steps"],
                       log_interval=model_config["log_interval"],
-                      tb_log_name=logs_folder_1,
                       callback=callback_1,
                       reset_num_timesteps=reset_num_time_steps_1)
 
@@ -134,7 +142,6 @@ if __name__ == "__main__":
 
         model_2.learn(total_timesteps=model_config["training_steps"],
                       log_interval=model_config["log_interval"],
-                      tb_log_name=logs_folder_2,
                       callback=callback_2,
                       reset_num_timesteps=reset_num_time_steps_2)
 

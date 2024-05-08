@@ -63,7 +63,6 @@ if __name__ == "__main__":
     if os.path.exists(run_data_file):
         print(f"Data file '{run_data_file}' found, loading...")
         model = algorithm.load(env=vec_envs,
-                               tb_log_name=logs_folder,
                                path=run_data_file)
         reset_num_time_steps = False
     else:
@@ -96,6 +95,7 @@ if __name__ == "__main__":
 
     for cycle in range(training_cycles):
         model.learn(total_timesteps=model_config["training_steps"],
+                    log_interval=model_config["log_interval"],
                     callback=callback,
                     reset_num_timesteps=reset_num_time_steps)
         reset_num_time_steps = False

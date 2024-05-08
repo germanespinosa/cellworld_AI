@@ -6,12 +6,12 @@ class CellworldCallback(BaseCallback):
     def __init__(self, verbose=0):
         super(CellworldCallback, self).__init__(verbose)
         self.captures_in_episode = 0
-        self.rewards = []
-        self.captures = []
-        self.captured = []
-        self.survival = []
-        self.finished = []
-        self.truncated = []
+        self.rewards = [0]
+        self.captures = [0]
+        self.captured = [0]
+        self.survival = [0]
+        self.finished = [0]
+        self.truncated = [0]
         self.agents = {}
         self.stats_windows_size = 0
         self.current_survival = 0.0

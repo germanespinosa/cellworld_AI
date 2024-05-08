@@ -6,6 +6,7 @@ import gymnasium
 
 def create_env(world_name: str = "21_05",
                use_lppos: bool = True,
+               use_other: bool = True,
                use_predator: bool = False,
                max_steps: int = 300,
                time_step: float = .25,
@@ -15,9 +16,10 @@ def create_env(world_name: str = "21_05",
                end_on_pov_goal: bool = True,
                **kwargs):
 
-    return gymnasium.make("CellworldDualEvade-v0",
+    env_ = gymnasium.make("CellworldDualEvade-v0",
                           world_name=world_name,
                           use_lppos=use_lppos,
+                          use_other=use_other,
                           use_predator=use_predator,
                           max_step=max_steps,
                           time_step=time_step,
@@ -26,11 +28,18 @@ def create_env(world_name: str = "21_05",
                           render=render,
                           end_on_pov_goal=end_on_pov_goal
                           )
+    if use_other:
+        print(f"Including other agent info in the observation: {type(env_.observation)}")
+    else:
+        print(f"NOT including other agent info in the observation: {type(env_.observation)}")
+    return env_
+
 
 
 def create_vec_env(environment_count: int,
                    world_name: str = "21_05",
                    use_lppos: bool = True,
+                   use_other: bool = True,
                    use_predator: bool = False,
                    max_steps: int = 300,
                    time_step: float = .25,
@@ -40,6 +49,7 @@ def create_vec_env(environment_count: int,
     return DummyVecEnv([lambda:
                         create_env(world_name=world_name,
                                    use_lppos=use_lppos,
+                                   use_other=use_other,
                                    use_predator=use_predator,
                                    max_steps=max_steps,
                                    time_step=time_step,
@@ -50,6 +60,7 @@ def create_vec_env(environment_count: int,
 def load_vec_env(environment_count: int,
                  world_name: str = "21_05",
                  use_lppos: bool = True,
+                 use_other: bool = True,
                  use_predator: bool = False,
                  max_steps: int = 300,
                  time_step: float = .25,
@@ -59,6 +70,7 @@ def load_vec_env(environment_count: int,
     return DummyVecEnv([lambda:
                         create_env(world_name=world_name,
                                    use_lppos=use_lppos,
+                                   use_other=use_other,
                                    use_predator=use_predator,
                                    max_steps=max_steps,
                                    time_step=time_step,

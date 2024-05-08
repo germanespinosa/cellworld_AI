@@ -21,6 +21,7 @@ def save_video_output(environment,
 
     def on_frame(surface, _):
         frame = np.rot90(pygame.surfarray.array3d(surface))
+        frame = np.flipud(frame)
         view.gameplay_frames.append(frame)
 
     view.on_frame = on_frame

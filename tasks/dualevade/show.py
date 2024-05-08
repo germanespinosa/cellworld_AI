@@ -16,6 +16,7 @@ def parse_arguments():
     parser.add_argument('-c', '--cycle', type=int, help='model cycle')
     parser.add_argument('-v', '--video', action='store_true', help='output episodes videos')
     parser.add_argument('-t', '--tlppo', action='store_true', help='performs tlppo training')
+    parser.add_argument('-o', '--other', action='store_true', help='include information about the other agent in observation')
     parser.add_argument('-s', '--silent', action='store_true', help='renders the environment to the screen')
     parser.add_argument('-rt', '--real_time', action='store_true', help='run_in_real_time')
 
@@ -68,6 +69,7 @@ if __name__ == "__main__":
     model_config = json.loads(open(model_configuration_file).read())
 
     environment = create_env(use_lppos=args.tlppo,
+                             use_other=args.other,
                              render=not args.silent,
                              real_time=args.real_time,
                              end_on_pov_goal=False,
