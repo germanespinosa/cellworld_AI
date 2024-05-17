@@ -16,6 +16,7 @@ def DQN_create(environment: VecEnv,
                learning_rate: float,
                batch_size: int,
                learning_starts: int,
+               tensorboard_log: str,
                **kwargs: typing.Any):
     return DQN("MlpPolicy",
                environment,
@@ -26,7 +27,8 @@ def DQN_create(environment: VecEnv,
                buffer_size=training_steps,
                learning_starts=learning_starts,
                replay_buffer_class=ReplayBuffer,
-               policy_kwargs={"net_arch": network_architecture}
+               policy_kwargs={"net_arch": network_architecture},
+               tensorboard_log=tensorboard_log
                )
 
 
@@ -36,6 +38,7 @@ def QRDQN_create(environment: VecEnv,
                  learning_rate: float,
                  batch_size: int,
                  learning_starts: int,
+                 tensorboard_log: str,
                  **kwargs: typing.Any):
     return QRDQN("MlpPolicy",
                  environment,
@@ -46,21 +49,24 @@ def QRDQN_create(environment: VecEnv,
                  buffer_size=training_steps,
                  learning_starts=learning_starts,
                  replay_buffer_class=ReplayBuffer,
-                 policy_kwargs={"net_arch": network_architecture}
-                 )
+                 policy_kwargs={"net_arch": network_architecture},
+                 tensorboard_log=tensorboard_log
+    )
 
 
 def PPO_create(environment: VecEnv,
                network_architecture: typing.List[int],
                learning_rate: float,
                n_steps: int,
+               tensorboard_log: str,
                **kwargs: typing.Any):
     return PPO("MlpPolicy",
                environment,
                learning_rate=learning_rate,
                n_steps=n_steps,
                policy_kwargs={"net_arch": network_architecture},
-               verbose=1)
+               verbose=1,
+               tensorboard_log=tensorboard_log)
 
 
 def RPPO_create(environment: VecEnv,
@@ -68,6 +74,7 @@ def RPPO_create(environment: VecEnv,
                 learning_rate: float,
                 batch_size: int,
                 n_steps: int,
+                tensorboard_log: str,
                 **kwargs: typing.Any):
     return RecurrentPPO("MlpLstmPolicy",
                         environment,
@@ -75,18 +82,21 @@ def RPPO_create(environment: VecEnv,
                         learning_rate=learning_rate,
                         policy_kwargs={"net_arch": network_architecture},
                         n_steps=n_steps,
-                        verbose=1)
+                        verbose=1,
+                        tensorboard_log=tensorboard_log)
 
 
 def TRPO_create(environment: VecEnv,
                 network_architecture: typing.List[int],
                 learning_rate: float,
+                tensorboard_log: str,
                 **kwargs: typing.Any):
     return TRPO("MlpPolicy",
                 environment,
                 verbose=1,
                 learning_rate=learning_rate,
-                policy_kwargs={"net_arch": network_architecture})
+                policy_kwargs={"net_arch": network_architecture},
+                tensorboard_log=tensorboard_log)
 
 
 algorithms = {"DQN": Algorithm(DQN_create, DQN.load),

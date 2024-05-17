@@ -1,7 +1,6 @@
 import os
-import typing
-
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+import typing
 import sys
 sys.path.append('../../')
 import json
@@ -12,6 +11,7 @@ from callback import CellworldCallback
 import config
 
 config.task_name = "botevade"
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Cellworld AI BotEvade training tool: trains an RL model on the Cellworld BotEvade OpenAI Gym environment')
@@ -63,13 +63,13 @@ if __name__ == "__main__":
     if os.path.exists(run_data_file):
         print(f"Data file '{run_data_file}' found, loading...")
         model = algorithm.load(env=vec_envs,
-                               tb_log_name=logs_folder,
+                               tensorboard_log=logs_folder,
                                path=run_data_file)
         reset_num_time_steps = False
     else:
         print(f"Data file '{run_data_file}' not found")
         model = algorithm.create(environment=vec_envs,
-                                 tensorboard_log_folder=logs_folder,
+                                 tensorboard_log=logs_folder,
                                  **model_config)
         reset_num_time_steps = True
 

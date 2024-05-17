@@ -77,14 +77,14 @@ if __name__ == "__main__":
     if os.path.exists(run_data_file_1):
         print(f"Data file '{run_data_file_1}' found, loading...")
         model_1 = algorithm.load(env=vec_envs_1,
-                                 tb_log_name=logs_folder_1,
+                                 tensorboard_log=logs_folder_1,
                                  path=run_data_file_1)
 
         reset_num_time_steps_1 = False
     else:
         print(f"Data file '{run_data_file_1}' not found")
         model_1 = algorithm.create(environment=vec_envs_1,
-                                   tb_log_name=logs_folder_1,
+                                   tensorboard_log=logs_folder_1,
                                    **model_config)
 
         reset_num_time_steps_1 = True
@@ -92,14 +92,14 @@ if __name__ == "__main__":
     if os.path.exists(run_data_file_2):
         print(f"Data file '{run_data_file_2}' found, loading...")
         model_2 = algorithm.load(env=vec_envs_2,
-                                 tb_log_name=logs_folder_2,
+                                 tensorboard_log=logs_folder_2,
                                  path=run_data_file_2)
 
         reset_num_time_steps_2 = False
     else:
         print(f"Data file '{run_data_file_2}' not found")
         model_2 = algorithm.create(environment=vec_envs_2,
-                                   tb_log_name=logs_folder_2,
+                                   tensorboard_log=logs_folder_2,
                                    **model_config)
 
         reset_num_time_steps_2 = True
