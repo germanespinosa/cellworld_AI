@@ -69,9 +69,9 @@ if __name__ == "__main__":
     if args.video:
         videos_folder = config.video_folder()
         print(f"Saving videos to {videos_folder}")
-        import video
-        video.save_video_output(environment=environment,
-                                video_folder=videos_folder)
+        from cellworld_game import save_video_output
+        save_video_output(environment.model,
+                          video_folder=videos_folder)
 
     scores = []
 
