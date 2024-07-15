@@ -39,6 +39,19 @@ def buffers_folder():
     return folder
 
 
+def experiments_folder():
+    folder = os.path.join("experiments", task_name, model_name, run_identifier)
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+
+def experiments_name():
+    from datetime import datetime
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    name = f"{now}_{task_name}_{model_name}_{run_identifier}"
+    return name
+
+
 def models_folder():
     return os.path.join("models", task_name)
 

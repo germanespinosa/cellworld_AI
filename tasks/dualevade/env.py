@@ -14,7 +14,7 @@ def create_env(world_name: str = "21_05",
                render: bool = False,
                real_time: bool = False,
                end_on_pov_goal: bool = True,
-               **kwargs):
+               **kwargs) -> cwg.DualEvadeEnv:
 
     env_ = gymnasium.make("CellworldDualEvade-v0",
                           world_name=world_name,
@@ -78,7 +78,7 @@ def load_vec_env(environment_count: int,
                         for _ in range(environment_count)])
 
 
-def set_other_policy(vec_env: DummyVecEnv, model):
+def set_other_policy(vec_env, model):
 
     def other_policy(obs: cwg.DualEvadeObservation) -> int:
         action, _states = model.predict(obs, deterministic=True)
